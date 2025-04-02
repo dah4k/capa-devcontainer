@@ -1,0 +1,52 @@
+# Copyright 2025 dah4k
+# SPDX-License-Identifier: EPL-2.0
+
+FROM opensuse/leap:15.6
+
+## Restore man-pages and other documentation
+RUN sed -i 's/^rpm.install.excludedocs.*/rpm.install.excludedocs = no/' /etc/zypp/zypp.conf
+
+RUN zypper --quiet --non-interactive refresh \
+ && zypper --quiet --non-interactive install --no-recommends \
+        binutils \
+        curl \
+        git \
+        gpg2 \
+        jq \
+        make \
+        man \
+        man-pages \
+        man-pages-posix \
+        python311 \
+        ripgrep \
+        tar \
+        vim \
+        vim-data \
+ && zypper --quiet --non-interactive clean
+
+## Create capa user
+RUN groupadd --gid 1000 capa \
+ && useradd --create-home --home-dir /home/capa --uid 1000 --gid 1000 capa
+
+USER capa
+
+WORKDIR /samples
+
+COPY files/data.gpg .
+
+## Build Mandiant CAPA from source code
+WORKDIR /src
+
+RUN git clone https://github.com/mandiant/capa
+
+WORKDIR /src/capa
+
+RUN git submodule update --init rules
+RUN python3.11 -m venv /src/.capa-venv
+ENV SAVED_PATH="$PATH"
+ENV PATH="/src/.capa-venv/bin:$PATH"
+RUN pip3 install -r requirements.txt
+RUN pip3 install pyinstaller
+RUN pip3 install -e .[build]
+RUN pyinstaller .github/pyinstaller/pyinstaller.spec
+ENV PATH="${SAVED_PATH}"
