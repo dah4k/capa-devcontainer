@@ -25,6 +25,10 @@ $(REGISTRY)/%: Dockerfile.%
 test: $(TEST_IMAGE) ## Test runtime container image
 	$(DOCKER) run --interactive --tty --rm --name=$(TEST_NAME) $(TEST_IMAGE)
 
+.PHONY: debug
+debug: $(TEST_IMAGE) ## Debug last running container image as root
+	$(DOCKER) exec --interactive --tty --user 0 `docker ps --last 1 --quiet` /bin/bash
+
 .PHONY: clean
 clean: ## Remove all container images
 	$(DOCKER) stop $(TEST_NAME) || true
