@@ -50,3 +50,41 @@ RUN pip3 install pyinstaller
 RUN pip3 install -e .[build]
 RUN pyinstaller .github/pyinstaller/pyinstaller.spec
 ENV PATH="${SAVED_PATH}"
+
+#   ## Build SageMath from source code
+#   ## https://github.com/sagemath/sage/tree/develop/build/pkgs/_prereq/distros
+#   USER root
+#   RUN zypper --quiet --non-interactive refresh \
+#    && zypper --quiet --non-interactive install --no-recommends \
+#           binutils \
+#           gcc \
+#           gcc-c++ \
+#           gcc-fortran \
+#           automake \
+#           autoconf \
+#           m4 \
+#           make \
+#           cmake \
+#           meson \
+#           ninja \
+#           pkg-config \
+#           libtool \
+#           patch \
+#           zlib-devel \
+#           bzip2 \
+#           boost-base \
+#    && zypper --quiet --non-interactive clean
+#   USER capa
+#
+#   WORKDIR /src
+#
+#   RUN git clone https://github.com/jvdsn/crypto-attacks
+#   RUN git clone https://github.com/sagemath/sage
+#
+#   WORKDIR /src/sage
+#
+#   RUN git checkout 10.7
+#   RUN ./bootstrap
+#   #RUN ./configure --prefix=/opt
+#   #RUN make -j$(nproc --ignore=2) build
+
